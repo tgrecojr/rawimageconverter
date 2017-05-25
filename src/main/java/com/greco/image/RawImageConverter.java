@@ -67,6 +67,7 @@ public class RawImageConverter {
         private static final String SPACE = " ";
         private static final String CONVERT_OUTPUT_MSG = "CONVERT OPERATION OUTPUT: ";
         private static final String CONVERT_ERROR_OUTPUT_MSG = "CONVERT ERROR OUTPUT: ";
+        private static final String LINE_TERMINATOR = "\n";
 
         @Override
         public FileVisitResult preVisitDirectory(Path dir,BasicFileAttributes attrs)
@@ -115,12 +116,12 @@ public class RawImageConverter {
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
             BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
             // read the output from the command
-            System.out.println(CONVERT_OUTPUT_MSG + "\n");
+            System.out.println(CONVERT_OUTPUT_MSG + LINE_TERMINATOR);
             while ((s = stdInput.readLine()) != null) {
                 System.out.println(s);
             }
             // read any errors from the attempted command
-            System.out.println(CONVERT_ERROR_OUTPUT_MSG + "\n");
+            System.out.println(CONVERT_ERROR_OUTPUT_MSG + LINE_TERMINATOR);
             while ((s = stdError.readLine()) != null) {
                 System.out.println(s);
             }
