@@ -153,16 +153,16 @@ public class RawFileVisitor extends SimpleFileVisitor<Path> {
     }
 
     private String getOutputFileNameAndLocation(String originalFileAndLocation){
-        //System.out.println("ORIGINAL: " + originalFileAndLocation);
         String fileName = originalFileAndLocation.substring(originalFileAndLocation.lastIndexOf("/") + 1,originalFileAndLocation.length());
         fileName = fileName.substring(0,fileName.length()-4) + "." + JPG_FILE_EXTENSION;
-        //System.out.println("FILENAME: " + fileName);
         String diffDir = StringUtils.remove(originalFileAndLocation,startDirectoryName);
         diffDir = StringUtils.remove(diffDir,fileName);
         diffDir = diffDir.substring(0,diffDir.lastIndexOf("/") + 1);
-        //System.out.println("DIFFDIR: " + diffDir);
+        File directoryToCreate = new File(outputDirectory + diffDir);
+        if(!directoryToCreate.exists()){
+            directoryToCreate.mkdir();
+        }
         String finalFileName = outputDirectory + diffDir + fileName;
-        //System.out.println("FINAL FILE NAME: " + finalFileName);
         return finalFileName;
 
     }
