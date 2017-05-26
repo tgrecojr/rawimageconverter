@@ -21,37 +21,72 @@ public class RawImageConverter {
 
     public static void main(String[] args) {
 
-        CommandLineParser clp = new BasicParser();
-        Options options = new Options();
-        Option d = new Option( "d", "directory", true, "The default input folder location" );
-        d.setRequired(true);
-        options.addOption( d );
-        try {
-            CommandLine line = clp.parse( options, args );
-            RawImageConverter ric = new RawImageConverter();
-            File f = new File(line.getOptionValue( "directory" ));
-            if (f.exists() && f.isDirectory()){
-                ric.processDirectory(line.getOptionValue( "directory" ));
-            }else{
-                System.out.println("This directory does not seem to exist.");
-            }
-
-        }
-
-        catch( ParseException exp ) {
-            System.out.println( "Unexpected exception:" + exp.getMessage() );
-        }
+        RawImageConverter ric = new RawImageConverter();
+        ric.processImages(args);
 
     }
+
+    private void processImages(String[] args){
+        Option helpOption = new Option("h", "help", false, "Shows this message");
+        Option directoryOption = new Option( "d", "directory", true, "The default input folder location" );
+        directoryOption.setRequired(true);
+        Option ouputDirectoryOption = new Option("o","outputDirectory",true,"The (optional) output Directory in case you don't want your new files in the same location");
+        Options options = new Options();
+        options.addOption(helpOption);
+        options.addOption(directoryOption);
+        options.addOption(ouputDirectoryOption);
+        CommandLineParser parser = new BasicParser();
+        try{
+            CommandLine cmdLine = parser.parse(options, args);
+            if (cmdLine.hasOption("help")) {
+                printHelpMessage(options);
+            }else{
+                String directoryLocation = cmdLine.getOptionValue("d");
+                String outputDirectoryLocation = cmdLine.getOptionValue("o");
+                File f = new File(directoryLocation);
+                if(f.exists() && f.isDirectory()){
+                    if (outputDirectoryLocation !=null){
+                        File o = new File(outputDirectoryLocation);
+                        if(o.exists() && o.isDirectory()){
+                            processDirectory(directoryLocation, outputDirectoryLocation);
+                        }
+                        else{
+                            System.out.println("ERROR: The output directory provided is invalid.");
+                            printHelpMessage(options);
+                        }
+                    }else{
+                        processDirectory(directoryLocation,outputDirectoryLocation);
+                    }
+                }else{
+                    System.out.println("ERROR: The image directory provided is invalid.");
+                    printHelpMessage(options);
+                }
+
+            }
+        }catch(ParseException pe){
+            System.out.println("INVALID OPTIONS: " + pe.getMessage());
+            printHelpMessage(options);
+        }
+    }
+
+    /**
+     * This method prints out the command line options and their descriptions.
+     * @param options The commons-cli command line options list
+     */
+    private void printHelpMessage(Options options){
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp("Raw Image Converter", options);
+    }
+
     /**
      * This method starts the process of examining the files, using RawFileVisitor to do the work.
      * @param directoryName The directory path where the files exist
      */
-    protected void processDirectory(String directoryName) {
+    protected void processDirectory(String directoryName, String outputDirectoryName) {
         FileSystem fileSystem = FileSystems.getDefault();
         Path rootPath = fileSystem.getPath(directoryName);
         try {
-            RawFileVisitor rfv = new RawFileVisitor("");
+            RawFileVisitor rfv = new RawFileVisitor(outputDirectoryName);
             Files.walkFileTree(rootPath, rfv);
         } catch (IOException ioe) {
             ioe.printStackTrace();
