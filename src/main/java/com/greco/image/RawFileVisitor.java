@@ -101,13 +101,25 @@ public class RawFileVisitor extends SimpleFileVisitor<Path> {
         String fileName = visitedFile.getFileName().toString();
         String fileEnding = fileName.substring(fileName.lastIndexOf(EXTENSION_SEPARATOR) + 1);
         if (fileEnding.equalsIgnoreCase(RAW_FILE_EXTENSION_BIG)){
-            File f = new File(getFileNameWithoutExtension(visitedFile.toString()) + "." + JPG_FILE_EXTENSION);
-            if(!f.exists()){
-                return true;
+            if(outputDirectory == null){
+                File f = new File(getFileNameWithoutExtension(visitedFile.toString()) + "." + JPG_FILE_EXTENSION);
+                if(!f.exists()){
+                    return true;
+                }else{
+                    System.out.println("SKIPPING (Converted file already exists):" + fileName);
+                    return false;
+                }
             }else{
-                System.out.println("SKIPPING (Converted file already exists):" + fileName);
-                return false;
+                System.out.println("CHECKING: " + getOutputFileNameAndLocation(visitedFile.toString()));
+                File f = new File(getOutputFileNameAndLocation(visitedFile.toString()));
+                if (!f.exists()){
+                    return true;
+                }else{
+                    System.out.println("SKIPPING (Converted file already exists):" + fileName);
+                    return false;
+                }
             }
+
         }else{
             return false;
         }
@@ -168,10 +180,7 @@ public class RawFileVisitor extends SimpleFileVisitor<Path> {
     }
 
     private String getNewFileName(String originalFileAndLocation){
-        originalFileAndLocation = originalFileAndLocation.substring(0,originalFileAndLocation.length()-4) +  "." + JPG_FILE_EXTENSION;
-
-        return originalFileAndLocation;
-
+        return originalFileAndLocation = originalFileAndLocation.substring(0,originalFileAndLocation.length()-4) +  "." + JPG_FILE_EXTENSION;
     }
 
 
