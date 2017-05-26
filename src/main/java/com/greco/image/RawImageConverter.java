@@ -86,7 +86,7 @@ public class RawImageConverter {
         FileSystem fileSystem = FileSystems.getDefault();
         Path rootPath = fileSystem.getPath(directoryName);
         try {
-            RawFileVisitor rfv = new RawFileVisitor(outputDirectoryName);
+            RawFileVisitor rfv = new RawFileVisitor(directoryName,outputDirectoryName);
             Files.walkFileTree(rootPath, rfv);
         } catch (IOException ioe) {
             ioe.printStackTrace();

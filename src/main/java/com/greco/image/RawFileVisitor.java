@@ -40,14 +40,16 @@ public class RawFileVisitor extends SimpleFileVisitor<Path> {
     private static final String LINE_TERMINATOR = "\n";
 
     private String outputDirectory;
+    private String startDirectoryName;
 
     /**
      * Creates a new RawFileVisitor object passing in an optional
      * outputDirectory
      * @param outputDir The path where you would like the JPG output files to be placed
      */
-    public RawFileVisitor(String outputDir){
+    public RawFileVisitor(String startDirName,String outputDir){
         outputDirectory = outputDir;
+        startDirectoryName = startDirName;
     }
 
     @Override
@@ -126,20 +128,19 @@ public class RawFileVisitor extends SimpleFileVisitor<Path> {
      * @param visitedFile This is the Java NIO Path
      */
     private void convertRawtoJPG(Path visitedFile) throws Exception{
-        String s = null;
-        String fileName = visitedFile.toString();
-        String newFileName = StringUtils.replace(fileName,RAW_FILE_EXTENSION_LITTLE,JPG_FILE_EXTENSION);
-        String finalNewFileName = StringUtils.replace(newFileName,RAW_FILE_EXTENSION_BIG,JPG_FILE_EXTENSION);
         String theConvertCommand;
         if(outputDirectory != null){
-            theConvertCommand = CONVERT_COMMAND + SPACE + visitedFile.toString() + SPACE + outputDirectory + "/" + finalNewFileName.substring(finalNewFileName.lastIndexOf("/"),finalNewFileName.length()) ;
+            theConvertCommand = CONVERT_COMMAND + SPACE + visitedFile.toString() + SPACE + getOutputFileNameAndLocation(visitedFile.toString()) ;
+            System.out.println(theConvertCommand);
         }else{
-            theConvertCommand = CONVERT_COMMAND + SPACE + visitedFile.toString() + SPACE + finalNewFileName;
+            theConvertCommand = CONVERT_COMMAND + SPACE + visitedFile.toString() + SPACE + getNewFileName(visitedFile.toString());
+            System.out.println(theConvertCommand);
         }
         Process p = Runtime.getRuntime().exec(theConvertCommand);
         BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
         BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
         // read the output from the command
+        String s;
         System.out.println(CONVERT_OUTPUT_MSG + LINE_TERMINATOR);
         while ((s = stdInput.readLine()) != null) {
             System.out.println(s);
@@ -150,5 +151,28 @@ public class RawFileVisitor extends SimpleFileVisitor<Path> {
             System.out.println(s);
         }
     }
+
+    private String getOutputFileNameAndLocation(String originalFileAndLocation){
+        //System.out.println("ORIGINAL: " + originalFileAndLocation);
+        String fileName = originalFileAndLocation.substring(originalFileAndLocation.lastIndexOf("/") + 1,originalFileAndLocation.length());
+        fileName = fileName.substring(0,fileName.length()-4) + "." + JPG_FILE_EXTENSION;
+        //System.out.println("FILENAME: " + fileName);
+        String diffDir = StringUtils.remove(originalFileAndLocation,startDirectoryName);
+        diffDir = StringUtils.remove(diffDir,fileName);
+        diffDir = diffDir.substring(0,diffDir.lastIndexOf("/") + 1);
+        //System.out.println("DIFFDIR: " + diffDir);
+        String finalFileName = outputDirectory + diffDir + fileName;
+        //System.out.println("FINAL FILE NAME: " + finalFileName);
+        return finalFileName;
+
+    }
+
+    private String getNewFileName(String originalFileAndLocation){
+        originalFileAndLocation = originalFileAndLocation.substring(0,originalFileAndLocation.length()-4) +  "." + JPG_FILE_EXTENSION;
+
+        return originalFileAndLocation;
+
+    }
+
 
 }
