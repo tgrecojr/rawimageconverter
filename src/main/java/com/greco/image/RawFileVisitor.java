@@ -172,7 +172,11 @@ public class RawFileVisitor extends SimpleFileVisitor<Path> {
         diffDir = diffDir.substring(0,diffDir.lastIndexOf("/") + 1);
         File directoryToCreate = new File(outputDirectory + diffDir);
         if(!directoryToCreate.exists()){
-            directoryToCreate.mkdir();
+            boolean success = directoryToCreate.mkdirs();
+            if(!success){
+                System.out.println("ERROR COULD NOT CREATE DIRECTORY: " + directoryToCreate.getName());
+                System.exit(-1);
+            }
         }
         String finalFileName = outputDirectory + diffDir + fileName;
         return finalFileName;
